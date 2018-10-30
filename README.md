@@ -1,1 +1,1 @@
-# coursera-datascience
+# Coursera Regression Models
