@@ -1,0 +1,69 @@
+---
+title: "Regression Models Project"
+author: "Xiaoqing Tan"
+date: "October 30, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Executive Summary
+
+In the report, I estimated the relationship between a set of variables and miles per gallon (MPG) (outcome). I investigated into two questions specifically: 1. “Is an automatic or manual transmission better for MPG”; 2. "Quantify the MPG difference between automatic and manual transmissions".
+
+# Exploratory Analysis
+```{r}
+head(mtcars)
+mtcars$am <- factor(mtcars$am,labels=c("Automatic","Manual"))
+
+# Test difference between two transmission groups
+automatic <- mtcars[mtcars$am == "Automatic",]
+manual <- mtcars[mtcars$am == "Manual",]
+summary(t.test(automatic$mpg, manual$mpg)$p.value)
+```
+
+From the above test, p-value < 0.05. We can tell there is a significant difference between two transmission group.
+
+# Model Fitting
+
+## Model 1
+
+```{r}
+# Use transmission type as the only predictor
+fit <- lm(mpg~factor(am), mtcars); summary(fit)
+```
+The result shows that the average MPG for automatic is 17.1 MPG, while manual is 7.2 MPG higher, which means the average MPG for manual is 24.3 MPG. The R-squared value is 0.36, which tells that this model only explains 36% of the variance.
+
+Therefore, a model with more than one predictor is needed. The below built a multivariate model. From the Plot 2 we can see that the variables "cyl", "disp", "hp", "wt" have strong correlation with the dependent variable "mpg". So I built a new model combining these variables along with the variable "am".
+
+## Model 2
+
+```{r}
+fit2 <- lm(mpg~am+cyl+disp+hp+wt, mtcars); summary(fit2)
+```
+
+"wt" and "am" have strong and significant correlation with "mpg". The difference between automatic and manual transmissions is 1.56 MPG. The R-squared value is 0.8551 so the model explains 85.51% of the variance. 
+
+Check the normality and homonity of Model 2 in Plot 3.
+
+## Compare two models
+
+```{r}
+anova(fit,fit2)
+```
+
+From the result we can see that the new model is significantly better than the first model, with a p-value < 0.05. 
+
+# Appendix
+```{r}
+# Plot 1: Boxplot of MPG by Transmission tyep
+boxplot(mpg ~ am, data = mtcars, col = (c("red","blue")), ylab = "MPG", xlab = "Transmission Type")
+
+# Plot 2: Pairs plot of the variables
+pairs(mpg~., mtcars)
+
+# Plot 3: residual plots
+par(mfrow = c(2,2)); plot(fit2)
+```
